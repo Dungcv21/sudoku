@@ -16,6 +16,8 @@
  */
 package org.secuso.privacyfriendlysudoku.ui;
 
+import static org.secuso.privacyfriendlysudoku.ui.TutorialActivity.ACTION_SHOW_ANYWAYS;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -27,29 +29,27 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.core.view.GravityCompat;
-import androidx.viewpager.widget.ViewPager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.widget.Toolbar;
-
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.navigation.NavigationView;
 
 import org.secuso.privacyfriendlysudoku.controller.GameController;
 import org.secuso.privacyfriendlysudoku.controller.GameStateManager;
@@ -63,8 +63,6 @@ import org.secuso.privacyfriendlysudoku.ui.view.databinding.DialogFragmentImport
 
 import java.util.LinkedList;
 import java.util.List;
-
-import static org.secuso.privacyfriendlysudoku.ui.TutorialActivity.ACTION_SHOW_ANYWAYS;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, IImportDialogFragmentListener{
 
@@ -321,10 +319,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         List<GameInfoContainer> gic = fm.loadGameStateInfo();
         if(gic.size() > 0 && !(gic.size() == 1 && gic.get(0).getID() == GameController.DAILY_SUDOKU_ID)) {
             continueButton.setEnabled(true);
-            continueButton.setBackgroundResource(R.drawable.button_standalone);
+            continueButton.setBackgroundResource(R.drawable.bgr_btn);
         } else {
             continueButton.setEnabled(false);
-            continueButton.setBackgroundResource(R.drawable.button_inactive);
+            continueButton.setBackgroundResource(R.drawable.bgr_nobtn);
         }
     }
 

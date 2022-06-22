@@ -28,6 +28,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <LinearLayout
         android:id="@+id/sudokuButtonLayout"
         android:layout_width="match_parent"
@@ -38,8 +39,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sudokuLayout">
-
+        app:layout_constraintTop_toBottomOf="@id/sudokuLayout"
+        >
         <org.secuso.privacyfriendlysudoku.ui.view.SudokuKeyboardLayout
             android:id="@+id/sudokuKeyboardLayout"
             android:layout_width="fill_parent"
