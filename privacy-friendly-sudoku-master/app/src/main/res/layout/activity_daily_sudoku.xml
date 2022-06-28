@@ -226,7 +226,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appbar"
         app:layout_constraintVertical_bias="0.95"
-        app:srcCompat="@android:drawable/ic_media_play" />
+        app:srcCompat="@android:drawable/ic_media_play"
+        app:backgroundTint="@color/colorAccent"/>
 
 
     <androidx.viewpager.widget.ViewPager
