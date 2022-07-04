@@ -22,13 +22,7 @@
             android:textSize="@dimen/slide_title"
             android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/slide3_heading2"
-            android:textColor="?attr/lightestFontColor"
-            android:textSize="@dimen/slide_title"
-            android:textStyle="bold" />
+
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/linearLayout5"

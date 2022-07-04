@@ -20,9 +20,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,29 +27,23 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 import org.secuso.privacyfriendlysudoku.controller.GameController;
 import org.secuso.privacyfriendlysudoku.controller.GameStateManager;
@@ -73,7 +64,6 @@ import org.secuso.privacyfriendlysudoku.ui.view.SudokuKeyboardLayout;
 import org.secuso.privacyfriendlysudoku.ui.view.SudokuSpecialButtonLayout;
 import org.secuso.privacyfriendlysudoku.ui.view.WinDialog;
 import org.secuso.privacyfriendlysudoku.ui.view.databinding.DialogFragmentShareBoardBinding;
-
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -137,12 +127,14 @@ public class GameActivity extends BaseActivity implements NavigationView.OnNavig
          */
         if (sharedPref.getBoolean("pref_dark_mode_setting", false )) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else if (sharedPref.getBoolean("pref_dark_mode_automatically_by_system", false)) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-
-        } else if(sharedPref.getBoolean("pref_dark_mode_automatically_by_battery", false)){
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY);
-        } else {
+        }
+//        else if (sharedPref.getBoolean("pref_dark_mode_automatically_by_system", false)) {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+//
+//        } else if(sharedPref.getBoolean("pref_dark_mode_automatically_by_battery", false)){
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY);
+//        }
+        else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
 
@@ -471,43 +463,11 @@ public class GameActivity extends BaseActivity implements NavigationView.OnNavig
                 resetDialog.show(getFragmentManager(), "ResetDialogFragment");
                 break;
 
-//            case R.id.menu_share:
-//                // Create import link from current sudoku board
-//                String scheme = GameActivity.validUris.size() > 0 ? GameActivity.validUris.get(0).getScheme()
-//                        + "://" + GameActivity.validUris.get(0).getHost() : "";
-//                if (!scheme.equals("") && !scheme.endsWith("/")) scheme = scheme + "/";
-//                String codeForClipboard = scheme + gameController.getCodeOfField();
-//
-//                // Create new ShareBoardDialog using the previously created links
-//                ShareBoardDialog shareDialog = new ShareBoardDialog();
-//                shareDialog.setDisplayCode(codeForClipboard);
-//                shareDialog.setCopyClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        // remember to include alternate code for older android versions
-//
-//                        //save link to clipboard
-//                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-//
-//                        if (clipboard != null) {
-//                            ClipData clip = ClipData.newPlainText("BoardCode", codeForClipboard);
-//                            clipboard.setPrimaryClip(clip);
-//                            Toast.makeText(GameActivity.this, R.string.copy_code_confirmation_toast,
-//                                    Toast.LENGTH_LONG).show();
-//                        } else {
-//                            Toast.makeText(GameActivity.this, R.string.copy_code_error_toast,
-//                                    Toast.LENGTH_LONG).show();
-//                        }
-//                    }
-//                });
-//                shareDialog.show(getFragmentManager(), "ShareDialogFragment");
-//
-//                break;
-
             case R.id.nav_newgame:
                 //create new game
-                intent = new Intent(this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent = new Intent(GameActivity.this, MainActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
                 finish();
                 break;
 
@@ -541,7 +501,6 @@ public class GameActivity extends BaseActivity implements NavigationView.OnNavig
             if (mainContent != null) {
                 mainContent.animate().alpha(0).setDuration(MAIN_CONTENT_FADEOUT_DURATION);
             }
-
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {

@@ -77,44 +77,34 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    long backPressedTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_menu);
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         if (settings.getBoolean("pref_dark_mode_setting", false )) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
-        } else if (settings.getBoolean("pref_dark_mode_automatically_by_system", false)) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-
-        } else if(settings.getBoolean("pref_dark_mode_automatically_by_battery", false)){
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY);
-        } else {
+        }
+//        else if (settings.getBoolean("pref_dark_mode_automatically_by_system", false)) {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+//
+//        } else if(settings.getBoolean("pref_dark_mode_automatically_by_battery", false)){
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY);
+//        }
+        else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
-
-        super.onCreate(savedInstanceState);
 
         NewLevelManager newLevelManager = NewLevelManager.getInstance(getApplicationContext(), settings);
 
         // check if we need to pre generate levels.
         newLevelManager.checkAndRestock();
-
-        setContentView(R.layout.activity_main_menu);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
 
-            /*
-          The {@link android.support.v4.view.PagerAdapter} that will provide
-          fragments for each of the sections. We use a
-          {@link FragmentPagerAdapter} derivative, which will keep every
-          loaded fragment in memory. If this becomes too memory intensive, it
-          may be best to switch to a
-          {@link android.support.v4.app.FragmentStatePagerAdapter}.
-         */
         final SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 
@@ -122,7 +112,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mViewPager = (ViewPager) findViewById(R.id.scroller);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        // set default gametype choice to whatever was chosen the last time.
         List<GameType> validGameTypes = GameType.getValidGameTypes();
         String lastChosenGameType = settings.getString("lastChosenGameType", GameType.Default_9x9.name());
         int index = validGameTypes.indexOf(Enum.valueOf(GameType.class, lastChosenGameType));
@@ -159,8 +148,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         final LinkedList<GameDifficulty> difficultyList = GameDifficulty.getValidDifficultyList();
         difficultyBar.setNumStars(difficultyList.size());
         difficultyBar.setMax(difficultyList.size());
-        //CheckBox createGameBar = (CheckBox) findViewById(R.id.circleButton);
-        //createGameBar.setButtonDrawable(R.drawable.create_game_src);
         difficultyBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
@@ -171,28 +158,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     difficultyText.setText(getString(difficultyList.get((int) ratingBar.getRating() - 1).getStringResID()));
                 } else {
                     difficultyText.setText(R.string.difficulty_custom);
-                    //createGameBar.setChecked(true);
                     ((Button)findViewById(R.id.playButton)).setText(R.string.create_game);
                 }
             }
         });
-
-//        createGameBar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                difficultyBar.setRating(0);
-//                ((Button)findViewById(R.id.playButton)).setText(R.string.create_game);
-//                createGameBar.setChecked(true);
-//            }
-//        });
-
         String retrievedDifficulty = settings.getString("lastChosenDifficulty", "Moderate");
         GameDifficulty lastChosenDifficulty = GameDifficulty.valueOf(
                 retrievedDifficulty.equals("Custom")? GameDifficulty.Unspecified.toString() : retrievedDifficulty);
 
         if (lastChosenDifficulty == GameDifficulty.Unspecified) {
             difficultyBar.setRating(0);
-            //createGameBar.setChecked(true);
         } else {
             difficultyBar.setRating(GameDifficulty.getValidDifficultyList().indexOf(lastChosenDifficulty) + 1);
         }
@@ -224,13 +199,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         overridePendingTransition(0, 0);
     }
 
-    public void callFragment(View view){
-        /*FragmentManager fm = getSupportFragmentManager();
-        DialogWinScreen winScreen = new DialogWinScreen();
-
-        winScreen.show(fm,"win_screen_layout");*/
-
-    }
     public void onClick(View view) {
 
         Intent i = null;
@@ -247,22 +215,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 break;
             case R.id.playButton:
                 GameType gameType = GameType.getValidGameTypes().get(mViewPager.getCurrentItem());
-//                if (((CheckBox)findViewById(R.id.circleButton)).isChecked()) {
-//                    // start CreateSudokuActivity
-//                    i = new Intent(this, CreateSudokuActivity.class);
-//                    i.putExtra("gameType", gameType.name());
-//
-//                    SharedPreferences.Editor editor = settings.edit();
-//                    editor.putString("lastChosenGameType", gameType.name());
-//                    editor.putString("lastChosenDifficulty", "Custom");
-//                    editor.apply();
-//                    //i.putExtra("gameDifficulty", GameDifficulty.Easy);
-//                    break;
-//                }
                 int index = difficultyBar.getProgress()-1;
                 GameDifficulty gameDifficulty = GameDifficulty.getValidDifficultyList().get(index < 0 ? 0 : index);
 
                 NewLevelManager newLevelManager = NewLevelManager.getInstance(getApplicationContext(), settings);
+                newLevelManager.checkAndRestock();
                 if(newLevelManager.isLevelLoadable(gameType, gameDifficulty)) {
                     // save current setting for later
                     SharedPreferences.Editor editor = settings.edit();
@@ -274,11 +231,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     i = new Intent(this, GameActivity.class);
                     i.putExtra("gameType", gameType.name());
                     i.putExtra("gameDifficulty", gameDifficulty.name());
-                } else {
-                    newLevelManager.checkAndRestock();
-                    Toast t = Toast.makeText(getApplicationContext(), R.string.generating, Toast.LENGTH_SHORT);
-                    t.show();
-                    return;
                 }
                 break;
             default:
@@ -306,9 +258,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     public void onResume() {
         super.onResume();
-
         selectNavigationItem(R.id.nav_newgame_main);
-
         refreshContinueButton();
     }
 
@@ -328,17 +278,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         drawer.closeDrawer(GravityCompat.START);
 
-        // return if we are not going to another page
         if(id == R.id.nav_newgame_main) {
             return true;
         }
 
-        // delay transition so the drawer can close
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -346,16 +293,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         }, NAVDRAWER_LAUNCH_DELAY);
 
-        // fade out the active activity (but not if the user chose to open the ImportBoardDialog)
         View mainContent = findViewById(R.id.main_content);
-//        if (mainContent != null && id != R.id.nav_import_sudoku) {
-//            mainContent.animate().alpha(0).setDuration(MAIN_CONTENT_FADEOUT_DURATION);
-//        }
 
         return true;
     }
 
-    // set active navigation item
     private void selectNavigationItem(int itemId) {
         for(int i = 0 ; i < mNavigationView.getMenu().size(); i++) {
             boolean b = itemId == mNavigationView.getMenu().getItem(i).getItemId();
@@ -367,10 +309,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         Intent intent;
 
         switch(id) {
-//            case R.id.nav_import_sudoku:
-//                ImportBoardDialog dialog = new ImportBoardDialog();
-//                dialog.show(getFragmentManager(), "ImportDialogFragment");
-//                break;
             case R.id.menu_settings_main:
                 //open settings
                 intent = new Intent(this, SettingsActivity.class);
@@ -417,16 +355,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         return true;
     }
-
-    /*@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        return super.onOptionsItemSelected(item);
-    }*/
 
     public void onImportDialogPositiveClick(String input) {
         String inputSudoku = null;
@@ -581,11 +509,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             return fragment;
         }
 
-        public GameTypeFragment() {
-
-        }
-
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
@@ -604,4 +527,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if(drawer.isDrawerOpen(GravityCompat.START)){
+            drawer.closeDrawer(GravityCompat.START);
+        }else{
+            if (backPressedTime + 3000 > System.currentTimeMillis()) {
+                super.onBackPressed();
+                finish();
+            } else {
+                Toast.makeText(this, "Press back again to leave the app.", Toast.LENGTH_LONG).show();
+            }
+            backPressedTime = System.currentTimeMillis();
+        }
+
+
+    }
 }

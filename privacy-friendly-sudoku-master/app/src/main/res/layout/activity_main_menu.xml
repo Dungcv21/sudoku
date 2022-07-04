@@ -25,7 +25,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="@color/colorToolbar"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
 
             </androidx.appcompat.widget.Toolbar>
@@ -40,43 +40,46 @@
             android:weightSum="10"
             android:id="@+id/main_content"
             style="?android:buttonBarStyle"
+            android:background="@drawable/bgrmain"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <RelativeLayout
                 android:layout_width="fill_parent"
                 android:layout_height="0dp"
                 android:layoutDirection="ltr"
-                android:layout_weight="4">
-
+                android:layout_weight="4"
+                >
                 <androidx.viewpager.widget.ViewPager
                     android:id="@+id/scroller"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
                 <ImageView
                     android:id="@+id/arrow_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_keyboard_arrow_left_black_24dp"
-                    android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
-                    android:padding="@dimen/activity_horizontal_margin"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_centerVertical="true"
-                    android:onClick="onClick"/>
+                    android:onClick="onClick"
+                    android:padding="@dimen/activity_horizontal_margin"
+                    app:srcCompat="@drawable/ic_keyboard_arrow_left_black_24dp" />
+
                 <ImageView
                     android:id="@+id/arrow_right"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp"
-                    android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
-                    android:padding="@dimen/activity_horizontal_margin"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
                     android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:layout_centerVertical="true"
-                    android:onClick="onClick"/>
+                    android:onClick="onClick"
+                    android:padding="@dimen/activity_horizontal_margin"
+                    app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
             </RelativeLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -89,54 +92,43 @@
                 android:baselineAligned="false"
                 android:gravity="center_horizontal"
                 >
-
-                <TextView
-                    android:id="@+id/difficultyText"
+                <LinearLayout
+                    android:layout_width="250dp"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/difficulty_easy"
-                    android:textSize="@dimen/main_text_difficulty"/>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:id="@+id/linearLayout4">
-
-<!--                    <androidx.appcompat.widget.AppCompatCheckBox-->
-<!--                        android:id="@+id/circleButton"-->
-<!--                        style="@style/CheckBox"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="0dp"-->
-<!--                        android:layout_marginTop="1dp"-->
-<!--                        android:layout_marginBottom="1dp"-->
-<!--                        android:button="@drawable/create_game_src"-->
-<!--                        app:layout_constraintBottom_toBottomOf="@+id/difficultyBar"-->
-<!--                        app:layout_constraintDimensionRatio="h,1:1"-->
-<!--                        app:layout_constraintEnd_toStartOf="@+id/difficultyBar"-->
-<!--                        app:layout_constraintHorizontal_bias="1.0"-->
-<!--                        app:layout_constraintStart_toStartOf="parent"-->
-<!--                        app:layout_constraintTop_toTopOf="@+id/difficultyBar"-->
-<!--                        app:layout_constraintVertical_bias="0.5" />-->
-
-
-                    <RatingBar
-                        android:id="@+id/difficultyBar"
-                        style="@style/RatingBar"
+                    android:orientation="vertical"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:background="@drawable/bgr_layout"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:id="@+id/difficultyText"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/difficulty_easy"
+                        android:textSize="@dimen/main_text_difficulty"/>
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:id="@+id/linearLayout4">
+                        <RatingBar
+                            android:id="@+id/difficultyBar"
+                            style="@style/RatingBar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="true"
+                            android:numStars="4"
+                            android:rating="1"
+                            android:stepSize="1"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.5"
+                            />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
 
-                        android:clickable="true"
-                        android:numStars="4"
-                        android:rating="1"
-                        android:stepSize="1"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.5"
-                        />
-                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <Button
                     android:textColor="?attr/lightestFontColor"
@@ -154,22 +146,6 @@
                     android:clickable="false"
                     android:elevation="10dp"
                     android:background="@drawable/bgr_btn"/>
-<!--                <Button-->
-<!--                    android:textColor="@color/red"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="0dp"-->
-<!--                    android:layout_marginTop="20dp"-->
-<!--                    android:layout_marginLeft="30dp"-->
-<!--                    android:layout_marginRight="30dp"-->
-<!--                    android:text="@string/menu_continue_game"-->
-<!--                    android:textStyle="normal"-->
-<!--                    android:textSize="@dimen/text_size"-->
-<!--                    android:id="@+id/continueButton"-->
-<!--                    android:layout_gravity="center_horizontal"-->
-<!--                    android:layout_weight="3"-->
-<!--                    android:onClick="onClick"-->
-<!--                    android:background="@drawable/bgr_btn"/>-->
-
                 <Button
                     android:id="@+id/continueButton"
                     android:layout_width="match_parent"

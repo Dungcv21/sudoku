@@ -13,7 +13,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="org.secuso.privacyfriendlysudoku.ui.SplashActivity"
-            android:theme="@style/SplashTheme">
+            android:theme="@style/SplashTheme"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -43,7 +44,8 @@
             android:name="org.secuso.privacyfriendlysudoku.ui.GameActivity"
             android:label="@string/title_activity_game_view"
             android:launchMode="singleTask"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
