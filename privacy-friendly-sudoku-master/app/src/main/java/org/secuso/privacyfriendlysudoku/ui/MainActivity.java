@@ -1,19 +1,3 @@
-/*
- This file is part of Privacy Friendly Sudoku.
-
- Privacy Friendly Sudoku is free software:
- you can redistribute it and/or modify it under the terms of the
- GNU General Public License as published by the Free Software Foundation,
- either version 3 of the License, or any later version.
-
- Privacy Friendly Sudoku is distributed in the hope
- that it will be useful, but WITHOUT ANY WARRANTY; without even
- the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with Privacy Friendly Sudoku. If not, see <http://www.gnu.org/licenses/>.
- */
 package org.secuso.privacyfriendlysudoku.ui;
 
 import static org.secuso.privacyfriendlysudoku.ui.TutorialActivity.ACTION_SHOW_ANYWAYS;
@@ -26,9 +10,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,6 +26,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
@@ -49,7 +37,23 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.ads.nativetemplates.NativeTemplateStyle;
+import com.google.android.ads.nativetemplates.TemplateView;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigValue;
 
 import org.secuso.privacyfriendlysudoku.controller.GameController;
 import org.secuso.privacyfriendlysudoku.controller.GameStateManager;
@@ -63,6 +67,7 @@ import org.secuso.privacyfriendlysudoku.ui.view.databinding.DialogFragmentImport
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, IImportDialogFragmentListener{
 
@@ -73,12 +78,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     DrawerLayout drawer;
     NavigationView mNavigationView;
 
+    FirebaseRemoteConfig mFirebaseRemoteConfig;
+
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
     long backPressedTime = 0;
-
+    AdLoader adLoader;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,15 +95,74 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
         }
-//        else if (settings.getBoolean("pref_dark_mode_automatically_by_system", false)) {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-//
-//        } else if(settings.getBoolean("pref_dark_mode_automatically_by_battery", false)){
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY);
-//        }
         else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
+        //admob
+        //-----------------------------------
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+        ///6499/example/native
+        adLoader = new AdLoader.Builder(MainActivity.this, "ca-app-pub-3940256099942544/2247696110")
+                .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
+                    @Override
+                    public void onNativeAdLoaded(NativeAd NativeAd) {
+                        if(!adLoader.isLoading()){
+                            //Toast.makeText(MainActivity.this, "Native load admod", Toast.LENGTH_SHORT).show();
+                        }
+                        if (isDestroyed()) {
+                            NativeAd.destroy();
+                        }
+                        NativeTemplateStyle styles = new
+                                NativeTemplateStyle.Builder().withMainBackgroundColor(new ColorDrawable(Color.WHITE)).build();
+                        TemplateView template = findViewById(R.id.my_template);
+                        template.setStyles(styles);
+                        template.setNativeAd(NativeAd);
+
+                    }
+                })
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Toast.makeText(MainActivity.this, "Failed admod", Toast.LENGTH_SHORT).show();
+                        ads();
+                    }
+                })
+                .withNativeAdOptions(new NativeAdOptions.Builder()
+
+                        .build())
+                .build();
+        adLoader.loadAd(new AdRequest.Builder().build());
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setMinimumFetchIntervalInSeconds(60)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+        //mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
+        mFirebaseRemoteConfig.fetchAndActivate()
+                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Boolean> task) {
+                        if (task.isSuccessful()) {
+                            boolean updated = task.getResult();
+                            //Log.d("TAG", "Config params updated: " + updated);
+                            String id = mFirebaseRemoteConfig.getString("id");
+                            Map<String, FirebaseRemoteConfigValue> a = mFirebaseRemoteConfig.getAll();
+                            Toast.makeText(MainActivity.this, id,
+                                    Toast.LENGTH_SHORT).show();
+                            Log.d("Config id", String.valueOf(mFirebaseRemoteConfig.getAll()));
+
+                        } else {
+                            Toast.makeText(MainActivity.this, "Fetch failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+
 
         NewLevelManager newLevelManager = NewLevelManager.getInstance(getApplicationContext(), settings);
 
@@ -111,7 +177,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.scroller);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
         List<GameType> validGameTypes = GameType.getValidGameTypes();
         String lastChosenGameType = settings.getString("lastChosenGameType", GameType.Default_9x9.name());
         int index = validGameTypes.indexOf(Enum.valueOf(GameType.class, lastChosenGameType));
@@ -140,8 +205,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onPageScrollStateChanged(int state) {
             }
         });
-
-
         // Set the difficulty Slider to whatever was chosen the last time
         difficultyBar = (RatingBar)findViewById(R.id.difficultyBar);
         difficultyText = (TextView) findViewById(R.id.difficultyText);
@@ -197,6 +260,35 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         selectNavigationItem(R.id.nav_newgame_main);
 
         overridePendingTransition(0, 0);
+    }
+
+    private void ads() {
+        AdLoader adLoaderr = new AdLoader.Builder(MainActivity.this, "6499/example/native")
+                .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
+                    @Override
+                    public void onNativeAdLoaded(NativeAd NativeAd) {
+                        if (isDestroyed()) {
+                            NativeAd.destroy();
+                        }
+                        NativeTemplateStyle styles = new
+                                NativeTemplateStyle.Builder().withMainBackgroundColor(new ColorDrawable(Color.WHITE)).build();
+                        TemplateView template = findViewById(R.id.my_template);
+                        template.setStyles(styles);
+                        template.setNativeAd(NativeAd);
+                    }
+                })
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Toast.makeText(MainActivity.this, "Failed admod", Toast.LENGTH_SHORT).show();
+                        ads();
+                    }
+                })
+                .withNativeAdOptions(new NativeAdOptions.Builder()
+
+                        .build())
+                .build();
+        adLoaderr.loadAd(new AdRequest.Builder().build());
     }
 
     public void onClick(View view) {
