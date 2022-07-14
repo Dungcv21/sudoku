@@ -21,9 +21,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,9 +28,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import org.secuso.privacyfriendlysudoku.ui.view.R;
 
@@ -213,10 +213,10 @@ public class TutorialActivity extends AppCompatActivity {
             View view = layoutInflater.inflate(layouts[position], container, false);
             container.addView(view);
 
-            CheckBox createGameBar = (CheckBox) findViewById(R.id.circleButton);
-            if(createGameBar != null) {
-                createGameBar.setButtonDrawable(R.drawable.create_game_src);
-            }
+//            CheckBox createGameBar = (CheckBox) findViewById(R.id.circleButton);
+//            if(createGameBar != null) {
+//                createGameBar.setButtonDrawable(R.drawable.create_game_src);
+//            }
 
             return view;
         }

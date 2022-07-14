@@ -1,42 +1,70 @@
 {
   "project_info": {
-    "project_number": "1006925086112",
-    "firebase_url": "https://testdata-df2f8-default-rtdb.firebaseio.com",
-    "project_id": "testdata-df2f8",
-    "storage_bucket": "testdata-df2f8.appspot.com"
+    "project_number": "349146971938",
+    "project_id": "gamesudoku-netlink",
+    "storage_bucket": "gamesudoku-netlink.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1006925086112:android:4e7dc086dbd0fa4136f8c5",
+        "mobilesdk_app_id": "1:349146971938:android:5d01b82162e22df9e26f7b",
         "android_client_info": {
           "package_name": "com.sudokunetlink"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1006925086112-btj38960h93tmaq1q9eukbrie34pg22i.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.sudokunetlink",
-            "certificate_hash": "9c61884aa96a6737f352e56826e910d9d948d7d2"
-          }
-        },
-        {
-          "client_id": "1006925086112-vc58pg1af3h113vhojbkdvvmccokfoc0.apps.googleusercontent.com",
+          "client_id": "349146971938-nha9u65hl3i0e76n3amq6ilmg6af9c3s.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA_qsCOsy3acrYnhL53mR5h2EZ5pnq5MCA"
+          "current_key": "AIzaSyCbsjdHyD_2B_KLOza3hjq1t6qyHtOOAdE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1006925086112-vc58pg1af3h113vhojbkdvvmccokfoc0.apps.googleusercontent.com",
+              "client_id": "349146971938-nha9u65hl3i0e76n3amq6ilmg6af9c3s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349146971938:android:7225c51292e86a6be26f7b",
+        "android_client_info": {
+          "package_name": "com.sudokunetlinkgame"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "349146971938-9jiov5rvraimfn0bhs68jh37lffnlnkm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sudokunetlinkgame",
+            "certificate_hash": "9c61884aa96a6737f352e56826e910d9d948d7d2"
+          }
+        },
+        {
+          "client_id": "349146971938-nha9u65hl3i0e76n3amq6ilmg6af9c3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbsjdHyD_2B_KLOza3hjq1t6qyHtOOAdE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "349146971938-nha9u65hl3i0e76n3amq6ilmg6af9c3s.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

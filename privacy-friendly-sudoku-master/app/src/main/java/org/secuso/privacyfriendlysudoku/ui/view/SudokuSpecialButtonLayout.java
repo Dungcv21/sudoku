@@ -16,6 +16,9 @@
  */
 package org.secuso.privacyfriendlysudoku.ui.view;
 
+import static org.secuso.privacyfriendlysudoku.ui.view.SudokuButtonType.Spacer;
+import static org.secuso.privacyfriendlysudoku.ui.view.SudokuButtonType.getSpecialButtons;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -30,21 +33,35 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.admanager.AdManagerAdRequest;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 import org.secuso.privacyfriendlysudoku.controller.GameController;
 import org.secuso.privacyfriendlysudoku.game.listener.IHighlightChangedListener;
 import org.secuso.privacyfriendlysudoku.ui.listener.IHintDialogFragmentListener;
 
 import java.util.LinkedList;
-
-import static org.secuso.privacyfriendlysudoku.ui.view.SudokuButtonType.Spacer;
-import static org.secuso.privacyfriendlysudoku.ui.view.SudokuButtonType.getSpecialButtons;
 
 /**
  * Created by TMZ_LToP on 17.11.2015.
@@ -61,7 +78,9 @@ public class SudokuSpecialButtonLayout extends LinearLayout implements IHighligh
     FragmentManager fragmentManager;
     Context context;
     float buttonMargin;
-
+    FirebaseRemoteConfig mFirebaseRemoteConfig;
+    String id_admod_reward, id_ads_reward;
+    RewardedAd mRewardedAd, mRewardedAds;
     OnClickListener listener = new OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -70,6 +89,40 @@ public class SudokuSpecialButtonLayout extends LinearLayout implements IHighligh
 
                 //int row = gameController.getSelectedRow();
                 //int col = gameController.getSelectedCol();
+                MobileAds.initialize(getContext(), new OnInitializationCompleteListener() {
+                    @Override
+                    public void onInitializationComplete(InitializationStatus initializationStatus) {
+                    }
+                });
+                ///6499/example/native
+                mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+                FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                        .setMinimumFetchIntervalInSeconds(60)
+                        .build();
+                mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+                //mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
+                mFirebaseRemoteConfig.fetchAndActivate()
+                        .addOnCompleteListener((Activity) getContext(), new OnCompleteListener<Boolean>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Boolean> task) {
+                                if (task.isSuccessful()) {
+                                    boolean updated = task.getResult();
+                                    //Log.d("TAG", "Config params updated: " + updated);
+                                    id_admod_reward = mFirebaseRemoteConfig.getString("id_admob_reward");
+                                    id_ads_reward = mFirebaseRemoteConfig.getString("id_ads_reward");
+                                    if(id_admod_reward != null){
+                                        loadReward();
+                                    }
+                                    if(id_ads_reward != null){
+                                        adsloadReward();
+                                    }
+//                            Log.d("Config id", id_admob_interstitial + " || " + id_ads_interstitial);
+                                } else {
+                                    Toast.makeText(getContext(), "Fetch failed",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
 
                 switch(btn.getType()) {
                     case Delete:
@@ -89,13 +142,34 @@ public class SudokuSpecialButtonLayout extends LinearLayout implements IHighligh
                         break;
                     case Hint:
                         if(gameController.isValidCellSelected()) {
-                            if(gameController.getUsedHints() == 0 && !gameController.gameIsCustom()) {
-                                // are you sure you want to use a hint?
-                                HintConfirmationDialog hintDialog = new HintConfirmationDialog();
-                                hintDialog.show(fragmentManager, "HintDialogFragment");
-
-                            } else {
-                                gameController.hint();
+//                            if(gameController.getUsedHints() == 0 && !gameController.gameIsCustom()) {
+//                                // are you sure you want to use a hint?
+//                                HintConfirmationDialog hintDialog = new HintConfirmationDialog();
+//                                hintDialog.show(fragmentManager, "HintDialogFragment");
+//
+//                            } else {
+//                                gameController.hint();
+//                            }
+                            if (mRewardedAd != null) {
+                                Activity activityContext = (Activity) getContext();
+                                mRewardedAd.show(activityContext, new OnUserEarnedRewardListener() {
+                                    @Override
+                                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                                        gameController.hint();
+                                        Toast.makeText(getContext(), "Admob", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else if(mRewardedAds!=null)  {
+                                Activity activityContext = (Activity) getContext();
+                                mRewardedAds.show(activityContext, new OnUserEarnedRewardListener() {
+                                    @Override
+                                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                                        gameController.hint();
+                                        Toast.makeText(getContext(), "Ads", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }else {
+                                Toast.makeText(getContext(), "Not qc", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             // Display a Toast that explains how to use the Hint function.
@@ -109,6 +183,66 @@ public class SudokuSpecialButtonLayout extends LinearLayout implements IHighligh
             }
         }
     };
+
+    private void adsloadReward() {
+        AdManagerAdRequest adRequest = new AdManagerAdRequest.Builder().build();
+        RewardedAd.load(getContext(), id_ads_reward,
+                adRequest, new RewardedAdLoadCallback() {
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        mRewardedAds = null;
+                    }
+                    @Override
+                    public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                        mRewardedAds = rewardedAd;
+                        mRewardedAds.setFullScreenContentCallback(new FullScreenContentCallback() {
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                mRewardedAds = null;
+                            }
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                mRewardedAds = null;
+                            }
+                        });
+                    }
+                });
+    }
+
+    private void loadReward() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        RewardedAd.load(getContext(), id_admod_reward,
+                adRequest, new RewardedAdLoadCallback() {
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error.
+                        mRewardedAd = null;
+                    }
+                    @Override
+                    public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                        mRewardedAd = rewardedAd;
+                        mRewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                            @Override
+                            public void onAdClicked() {
+                            }
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                mRewardedAd = null;
+                            }
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                mRewardedAd = null;
+                            }
+                            @Override
+                            public void onAdImpression() {
+                            }
+                            @Override
+                            public void onAdShowedFullScreenContent() {
+                            }
+                        });
+                    }
+                });
+    }
 
 
     public SudokuSpecialButtonLayout(Context context, AttributeSet attrs) {

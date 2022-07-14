@@ -18,11 +18,12 @@ package org.secuso.privacyfriendlysudoku.game;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.StringRes;
 
-import java.util.LinkedList;
-
 import org.secuso.privacyfriendlysudoku.ui.view.R;
+
+import java.util.LinkedList;
 
 /**
  * Created by Chris on 18.11.2015.

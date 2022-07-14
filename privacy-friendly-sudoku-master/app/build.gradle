@@ -7,7 +7,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.sudokunetlink"
+        applicationId "com.sudokunetlinkgame"
         minSdkVersion 21
         targetSdkVersion 32
         versionCode 1
