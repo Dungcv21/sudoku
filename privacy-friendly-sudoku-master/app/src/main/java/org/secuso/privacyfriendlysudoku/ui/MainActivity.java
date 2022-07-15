@@ -81,7 +81,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     ImageView arrowLeft, arrowRight;
     DrawerLayout drawer;
     NavigationView mNavigationView;
-
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
     FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     /**
@@ -90,9 +91,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ViewPager mViewPager;
     long backPressedTime = 0;
     AdLoader adLoader;
-    String id_admod_native = "", id_ads_native = "";
-    String  id_admob_interstitial = "", id_ads_interstitial = "";
+    String id_admob_native, id_ads_native;
+    String  id_admob_interstitial, id_ads_interstitial;
     Boolean checkid = false;
+    String check;
 
     //inters
     InterstitialAd mInterstitialAd;
@@ -101,6 +103,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+        sharedPreferences = getSharedPreferences("dataID", MODE_PRIVATE);
+        editor = sharedPreferences.edit();
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         if (settings.getBoolean("pref_dark_mode_setting", false )) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
@@ -115,39 +119,39 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onInitializationComplete(InitializationStatus initializationStatus) {
             }
         });
-        ///6499/example/native
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
                 .setMinimumFetchIntervalInSeconds(60)
                 .build();
         mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
-        //mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
         mFirebaseRemoteConfig.fetchAndActivate()
                 .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
                     @Override
                     public void onComplete(@NonNull Task<Boolean> task) {
                         if (task.isSuccessful()) {
                             boolean updated = task.getResult();
-                            //Log.d("TAG", "Config params updated: " + updated);
-                            id_admod_native = mFirebaseRemoteConfig.getString("id_admob_native");
-                            id_ads_native = mFirebaseRemoteConfig.getString("id_ads_native");
-                            id_admob_interstitial = mFirebaseRemoteConfig.getString("id_admob_interstitial");
-                            id_ads_interstitial = mFirebaseRemoteConfig.getString("id_ads_interstitial");
-                            if(id_admob_interstitial != null){
-                                loadInterstitial();
-                            }
-                            if(id_ads_interstitial != null){
-                                loadInterstitialAds();
-                            }
-//                            Log.d("Config id", id_admob_interstitial + " || " + id_ads_interstitial);
+                            check = mFirebaseRemoteConfig.getString("check");
+                            editor.putString("check", check);
+                            editor.commit();
                         } else {
                             Toast.makeText(MainActivity.this, "Fetch failed",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
-        if(id_admod_native != null) {
+        SharedPreferences msharedPreferences = getSharedPreferences("dataID", MODE_PRIVATE);
+        //Toast.makeText(this, msharedPreferences.getString("check", ""), Toast.LENGTH_SHORT).show();
+        check = msharedPreferences.getString("check", "");
+        id_admob_native = msharedPreferences.getString("id_admob_native", "");
+        id_ads_native = msharedPreferences.getString("id_ads_native", "");
+        id_admob_interstitial = msharedPreferences.getString("id_admob_interstitial", "");
+        id_ads_interstitial = msharedPreferences.getString("id_ads_interstitial", "");
+        if(check.equalsIgnoreCase("1")){
+            loadInterstitial();
             admob();
+        }else{
+            loadInterstitialAds();
+            ads();
         }
         NewLevelManager newLevelManager = NewLevelManager.getInstance(getApplicationContext(), settings);
         // check if we need to pre generate levels.
@@ -207,18 +211,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         String retrievedDifficulty = settings.getString("lastChosenDifficulty", "Moderate");
         GameDifficulty lastChosenDifficulty = GameDifficulty.valueOf(retrievedDifficulty);
                 //retrievedDifficulty.equals("Custom")? GameDifficulty.Unspecified.toString() : retrievedDifficulty);
-
         if (lastChosenDifficulty == GameDifficulty.Unspecified) {
             difficultyBar.setRating(0);
         } else {
             difficultyBar.setRating(GameDifficulty.getValidDifficultyList().indexOf(lastChosenDifficulty) + 1);
         }
-
         if(Configuration.SCREENLAYOUT_SIZE_SMALL == (getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)) {
             difficultyBar.setScaleX(0.75f);
             difficultyBar.setScaleY(0.75f);
         }
-
         // on first create always check for loadable levels!
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("savesChanged", true);
@@ -230,16 +231,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         mNavigationView = (NavigationView) findViewById(R.id.nav_view_main);
         mNavigationView.setNavigationItemSelectedListener(this);
-
         selectNavigationItem(R.id.nav_newgame_main);
-
         overridePendingTransition(0, 0);
     }
     private void admob() {
-        adLoader = new AdLoader.Builder(MainActivity.this, id_admod_native)
+        adLoader = new AdLoader.Builder(MainActivity.this, id_admob_native)
                 .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
                     @Override
                     public void onNativeAdLoaded(NativeAd NativeAd) {
@@ -256,14 +254,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .withAdListener(new AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        //Toast.makeText(MainActivity.this, "Failed admod", Toast.LENGTH_SHORT).show();
-                        if(id_ads_native !=null){
-                            ads();
-                        }
                     }
                 })
                 .withNativeAdOptions(new NativeAdOptions.Builder()
-
                         .build())
                 .build();
         adLoader.loadAd(new AdRequest.Builder().build());
@@ -286,10 +279,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .withAdListener(new AdListener() {
                     @Override
                     public void onAdFailedToLoad(LoadAdError adError) {
-                        //Toast.makeText(MainActivity.this, "Failed ads", Toast.LENGTH_SHORT).show();
-                        if(id_admod_native !=null){
-                            admob();
-                        }
                     }
                 })
                 .withNativeAdOptions(new NativeAdOptions.Builder()
@@ -307,7 +296,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 mViewPager.arrowScroll(View.FOCUS_RIGHT);
                 break;
             case R.id.continueButton:
-                checkid = false;
                 if (mInterstitialAd != null) {
                     mInterstitialAd.show(MainActivity.this);
                     mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
@@ -323,7 +311,22 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                             mInterstitialAd = null;
                         }
                     });
-                } else {
+                }else if(mAdManagerInterstitialAd != null){
+                        mAdManagerInterstitialAd.show(MainActivity.this);
+                        mAdManagerInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                mAdManagerInterstitialAd = null;
+                                Intent a = new Intent(MainActivity.this, LoadGameActivity.class);
+                                a.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(a);
+                            }
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                mAdManagerInterstitialAd = null;
+                            }
+                        });
+                    } else {
                     i = new Intent(this, LoadGameActivity.class);
                 }
                 break;
@@ -360,7 +363,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 break;
             default:
         }
-
         final Intent intent = i;
         if(intent != null) {
             View mainContent = findViewById(R.id.main_content);
@@ -386,24 +388,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         mInterstitialAd = null;
-                        if (mAdManagerInterstitialAd != null) {
-                            mAdManagerInterstitialAd.show(MainActivity.this);
-                            mAdManagerInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
-                                @Override
-                                public void onAdDismissedFullScreenContent() {
-                                    mAdManagerInterstitialAd = null;
-                                    Intent a = new Intent(MainActivity.this, LoadGameActivity.class);
-                                    a.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                    startActivity(a);
-                                }
-                                @Override
-                                public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                    mAdManagerInterstitialAd = null;
-                                }
-                            });
-                        }else {
-                           Toast.makeText(MainActivity.this, "Faillll", Toast.LENGTH_SHORT).show();
-                        }
+                        Toast.makeText(MainActivity.this, "admodFail" + " | " + id_admob_interstitial, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -416,14 +401,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     public void onAdLoaded(@NonNull AdManagerInterstitialAd interstitialAds) {
                         mAdManagerInterstitialAd = interstitialAds;
                     }
-
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         mAdManagerInterstitialAd = null;
+                        Toast.makeText(MainActivity.this, "adsFail" + " | " + id_ads_interstitial, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-
     @Override
     public void onResume() {
         super.onResume();
